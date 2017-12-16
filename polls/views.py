@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+# https://docs.djangoproject.com/en/2.0/ref/models/expressions/#avoiding-race-conditions-using-f
+from django.db.models import F
 
 from .models import Choice, Question
 
@@ -29,7 +31,10 @@ def vote(request, question_id):
             'error_message': "You didn't select a choice.",
         })
     else:
-        selected_choice.votes += 1
+        # Avoiding race conditions. Let db increment value when save()
+        # is called:
+        # selected_choice.votes += 1
+        selected_choice.votes = F('votes') + 1
         selected_choice.save()
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
