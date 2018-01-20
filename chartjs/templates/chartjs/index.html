@@ -41,8 +41,10 @@
         // console.log( JSON.stringify(response) )
         console.log( response ); // server response
         console.log( response.content );
-        console.log( response.content.x );
-        console.log( response.content.y );
+        console.log( response.content.x[0] );
+        console.log( response.content.x[1] );
+        console.log( response.content.y[0] );
+        console.log( response.content.y[1] );
 
         var label = 'Scatter Dataset'
         // Create the chart.js data structure using 'labels' and 'data'
@@ -54,11 +56,12 @@
                     label: label,
                     backgroundColor: ["#3e95cd"],
                     data: [{
-                        x: 1,
-                        y: response.content.x
-                    }, {
-                        x: 2,
-                        y: response.content.y
+                        x: response.content.x[0],
+                        y: response.content.y[0]
+                    },
+                    {
+                        x: response.content.x[1],
+                        y: response.content.y[1]
                     }]
                 }]
             },
@@ -77,7 +80,7 @@
                         position: 'bottom',
                         ticks: {
                           suggestedMin: -2,
-                          suggestedMax: 10,
+                          suggestedMax: 80,
                         }
                     }]
                 },
@@ -91,7 +94,7 @@
 
     drawScatterChart();
 
-    setInterval(drawScatterChart, 1000);
+    setInterval(drawScatterChart, 5000);
 
 
 
