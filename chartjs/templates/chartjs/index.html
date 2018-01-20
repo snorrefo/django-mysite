@@ -1,3 +1,157 @@
 {% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-Welcome to chartjs index.
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+
+
+    <title>chart.js test</title>
+  </head>
+  <body>
+    <div class="container">
+      Test
+    </div>
+    <div class="container">
+      <canvas id="myChart"></canvas>
+    </div>
+
+
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+    <script src="https://code.jquery.com/jquery-3.0.0.min.js" integrity="sha384-THPy051/pYDQGanwU6poAc/hOdQxjnOEXzbT+OuUAFqNqFjL+4IGLBgCJC3ZOShY" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.js"></script>
+    <!-- <script src="chartjs-make.js"></script> -->
+
+    <script>
+    function drawScatterChart() {
+      var jsonData = $.getJSON({
+        url: 'api/pos',
+        data: '',
+      }).done(function (response) {
+        // console.log( JSON.stringify(response) )
+        console.log( response ); // server response
+        console.log( response.content );
+        console.log( response.content.x );
+        console.log( response.content.y );
+
+        var label = 'Scatter Dataset'
+        // Create the chart.js data structure using 'labels' and 'data'
+        var ctx = document.getElementById("myChart").getContext("2d");
+        var scatterChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: label,
+                    backgroundColor: ["#3e95cd"],
+                    data: [{
+                        x: 1,
+                        y: response.content.x
+                    }, {
+                        x: 2,
+                        y: response.content.y
+                    }]
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'linear',
+                        position: 'bottom',
+                        ticks: {
+                          suggestedMin: 0,
+                          suggestedMax: 3,
+                        }
+                    }],
+                    yAxes: [{
+                        type: 'linear',
+                        position: 'bottom',
+                        ticks: {
+                          suggestedMin: -2,
+                          suggestedMax: 10,
+                        }
+                    }]
+                },
+                animation: false
+            }
+        }); // scatterChart
+
+      }); // getJSON
+
+    } // drawScatterChart
+
+    drawScatterChart();
+
+    setInterval(drawScatterChart, 1000);
+
+
+
+    // // Alternative method:
+    // $.getJSON( "json/", function( response ) {
+    //     console.log( response ); // server response
+    //     console.log( response.content );
+    //     console.log( response.content.x );
+    //     console.log( response.content.y );
+    //
+    // });
+
+    // // Get JSON-formatted data from the server
+    // $.getJSON( "json/", function( resp ) {
+    //
+    //     // Log each key in the response data
+    //     $.each( resp, function( key, value ) {
+    //         console.log( key + " : " + value );
+    //
+    //     });
+    // });
+
+    </script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+    <script>
+    // https://www.eclipse.org/paho/clients/js/
+    // Create a client instance
+    // var location = {hostname: '10.0.0.40', port: '1883'}
+    client = new Paho.MQTT.Client('10.0.0.40', Number(1883), "clientId");
+
+    // set callback handlers
+    client.onConnectionLost = onConnectionLost;
+    client.onMessageArrived = onMessageArrived;
+
+    // connect the client
+    client.connect({onSuccess:onConnect,userName: 'mqtt-snowes', password: 'mqtt-gigantiskemeloner'});
+
+
+    // called when the client connects
+    function onConnect() {
+      // Once a connection has been made, make a subscription and send a message.
+      console.log("onConnect");
+      client.subscribe("World");
+      message = new Paho.MQTT.Message("Hello");
+      message.destinationName = "World";
+      client.send(message);
+    }
+
+    // called when the client loses its connection
+    function onConnectionLost(responseObject) {
+      if (responseObject.errorCode !== 0) {
+        console.log("onConnectionLost:"+responseObject.errorMessage);
+      }
+    }
+
+    // called when a message arrives
+    function onMessageArrived(message) {
+      console.log("onMessageArrived:"+message.payloadString);
+    }
+    </script> -->
+
+  </body>
+</html>
