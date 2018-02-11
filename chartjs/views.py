@@ -13,6 +13,11 @@ def index(request):
     return render(request, template_name, context)
 
 
+def websockets(request):
+    template_name = 'chartjs/websockets.html'
+    context = {}
+    return render(request, template_name, context)
+
 # def api_pos(request):
 #     return HttpResponse("Test.")
 @ajax
