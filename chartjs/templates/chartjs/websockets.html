@@ -14,8 +14,15 @@
   </head>
   <body>
     <div class="container">
-      Test
+      <canvas id="myChart" width="400" height="400"></canvas>
     </div>
+    <div class="container">
+      rssi01:<div id="rssi01"></div>
+      dist01:<div id="dist01"></div>
+      rssi02:<div id="rssi02"></div>
+      dist02:<div id="dist02"></div>
+    </div>
+
 
 
 
@@ -27,11 +34,56 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
 
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.js"></script> -->
-    <!-- <script src="chartjs-make.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript" integrity="sha384-re/MqgVc3EnlGboyalOS/u4SWmaBGtL/N+BiAwLVaddPVuMvZCcgvXpQWyts+f28" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.2/mqttws31.js" type="text/javascript" integrity="sha384-z+Cw+Mddzjan08mlR82l5pV9JYy1Y/DcAalbYIllq3zi9zVGaD6ly6cmYeGPphMU" crossorigin="anonymous"></script>
     <script type="text/javascript">
+      var ctx = document.getElementById("myChart");
+      var scatterChart = new Chart(ctx, {
+          type: 'scatter',
+          data: {
+              datasets: [{
+                  label: 'Scatter Dataset',
+                  data: [{
+                      x: 0,
+                      y: 0
+                  }, {
+                      x: 1,
+                      y: -10
+                  }, {
+                      x: 2,
+                      y: -5
+                  }, {
+                      x: 3,
+                      y: -100
+                  }]
+              },{
+                  label: 'Scatter Dataset2',
+                  backgroundColor: 'blue',
+                  data: [{
+                      x: 0,
+                      y: 0
+                  }, {
+                      x: 1,
+                      y: -10
+                  }, {
+                      x: 2,
+                      y: -5
+                  }, {
+                      x: 3,
+                      y: -100
+                  }]
+              }]
+          },
+          options: {
+              scales: {
+                  xAxes: [{
+                      type: 'linear',
+                      position: 'bottom'
+                  }]
+              }
+          }
+      });
 
       var mqttbroker = {
         hostname: '10.0.0.40',
@@ -49,15 +101,49 @@
       // connect the client
       client.connect({onSuccess:onConnect});
 
+      // var mac = "2fb597bc5b2d";
+      // var det01 = "esp-link-01-test";
+      // var det02 = "esp-link-02-test";
 
+      var mac = "4040d97c01ca"; // green2
+      // var mac = "690c91432569";
+      var det01 = "esp-link-03-r3";
+      var det02 = "esp-link-04-g4";
+
+      var raw01 = "happy-bubbles/ble/" + det01 + "/raw/" + mac;
+      var raw02 = "happy-bubbles/ble/" + det02 + "/raw/" + mac;
+      console.log(raw01)
+      console.log(raw02)
+      var ha01 = "happy-bubbles/presence/ha/" + det01;
+      var ha02 = "happy-bubbles/presence/ha/" + det02;
+      console.log(ha01);
+      console.log(ha02);
       // called when the client connects
       function onConnect() {
         // Once a connection has been made, make a subscription and send a message.
         console.log("onConnect");
-        client.subscribe("world");
-        message = new Paho.MQTT.Message("Hello");
-        message.destinationName = "world";
-        client.send(message);
+        client.subscribe(raw01);
+        client.subscribe(raw02);
+
+        client.subscribe(ha01);
+        client.subscribe(ha02);
+
+        // happy-bubbles/ble/esp-link-02-test/raw/2fb597bc5b2d
+        // {
+        //   "hostname" : "esp-link-02-test",
+        //   "mac" : "2fb597bc5b2d",
+        //   "rssi" : -70,
+        //   "is_scan_response" : "0",
+        //   "type" : "3",
+        //   "data" : "1eff0600010920009b740ed6f44b284ec855f71063686e988e7f903a226534"
+        // }
+        // happy-bubbles/presence/ha/esp-link-02-test
+        // {
+        //   "id" : "2fb597bc5b2d",
+        //   "name" : "test",
+        //   "distance" : 73
+        // }
+
       }
 
       // called when the client loses its connection
@@ -69,8 +155,51 @@
 
       // called when a message arrives
       function onMessageArrived(message) {
-        console.log("onMessageArrived:"+message.payloadString);
+        switch (message.destinationName) {
+          case raw01: // happy-bubbles/ble/esp-link-01-test/raw/2fb597bc5b2d
+            // console.log("01-topic:"+message.destinationName+",payload:"+message.payloadString);
+            var payload = JSON.parse(message.payloadString);
+            chContentbyID('rssi01', payload.rssi);
+            chChartbyIdx(0, 1, payload.rssi);
+
+            break;
+          case raw02: // happy-bubbles/ble/esp-link-02-test/raw/2fb597bc5b2d
+            // console.log("02-topic:"+message.destinationName+",payload:"+message.payloadString);
+            var payload = JSON.parse(message.payloadString);
+            chContentbyID('rssi02', payload.rssi);
+            chChartbyIdx(0, 2, payload.rssi);
+
+            break;
+          case ha01: // 'happy-bubbles/presence/ha/esp-link-01-test'
+            console.log("01-topic:"+message.destinationName+",payload:"+message.payloadString);
+            var payload = JSON.parse(message.payloadString);
+            chContentbyID('dist01', -payload.distance);
+            chChartbyIdx(1, 1, -payload.distance);
+
+            break;
+          case ha02: // 'happy-bubbles/presence/ha/esp-link-02-test'
+            console.log("02-topic:"+message.destinationName+",payload:"+message.payloadString);
+            var payload = JSON.parse(message.payloadString);
+            chContentbyID('dist02', -payload.distance);
+            chChartbyIdx(1, 2, -payload.distance);
+
+            break;
+          default:
+            console.log("no topic match:topic:"+message.destinationName+",payload:"+message.payloadString);
+
+        } // switch
+      } // onMessageArrived
+
+      function chContentbyID(id,value) {
+        var element = document.getElementById(id);
+        element.innerHTML = value;
       }
+
+      function chChartbyIdx(idxset,idx,value) {
+        scatterChart.data.datasets[idxset].data[idx].y = value;
+        scatterChart.update(0);
+      }
+
     </script>
 
   </body>
